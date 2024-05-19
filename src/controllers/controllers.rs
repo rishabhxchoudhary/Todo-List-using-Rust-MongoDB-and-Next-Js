@@ -1,6 +1,7 @@
-use mongodb::Collection;
+use mongodb::{bson::doc, Collection};
 use crate::{models::models::Todo, state::AppState};
 use futures::TryStreamExt;
+use mongodb::bson::oid::ObjectId;
 
 pub async fn get_all_tasks(state : AppState) -> Vec<Todo> {
     let client : &mongodb::Client = &state.db_client;
@@ -11,4 +12,20 @@ pub async fn get_all_tasks(state : AppState) -> Vec<Todo> {
         tasks.push(doc);
     }
     tasks
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct Foo {
+    oid: ObjectId,
+}
+
+pub async fn get_task_by_id(state : AppState, id: String) -> Option<Todo> {
+    let client : &mongodb::Client = &state.db_client;
+    let collection: Collection<Todo> = client.database("todoList").collection("tasks");
+    if let Ok(object_id) = ObjectId::parse_str(&id) {
+        let todo = collection.find_one(doc! { "_id": object_id }, None).await.unwrap();
+        todo
+    } else {
+        None
+    }
 }
