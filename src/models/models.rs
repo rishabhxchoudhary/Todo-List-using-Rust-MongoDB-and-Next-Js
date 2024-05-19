@@ -7,6 +7,7 @@ pub struct Todo {
     pub id: Option<ObjectId>,
     pub title: String,
     pub description: String,
+    pub completed: bool
 }
 
 #[derive(Serialize, Deserialize, Clone)]

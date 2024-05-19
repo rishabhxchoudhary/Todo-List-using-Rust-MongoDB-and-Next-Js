@@ -30,3 +30,23 @@ pub async fn create_task(state : AppState, todo: Todo) {
     let collection: Collection<Todo> = client.database("todoList").collection("tasks");
     let _ = collection.insert_one(todo, None).await;
 }
+
+pub async fn delete_task(state : AppState, id: String) {
+    let client : &mongodb::Client = &state.db_client;
+    let collection: Collection<Todo> = client.database("todoList").collection("tasks");
+    if let Ok(object_id) = ObjectId::parse_str(&id) {
+        let _ = collection.delete_one(doc! { "_id": object_id }, None).await;
+    }
+}
+
+pub async fn toggle_task(state : AppState, id: String) {
+    let client : &mongodb::Client = &state.db_client;
+    let collection: Collection<Todo> = client.database("todoList").collection("tasks");
+    if let Ok(object_id) = ObjectId::parse_str(&id) {
+        let todo = collection.find_one(doc! { "_id": object_id }, None).await.unwrap();
+        if let Some(mut todo) = todo {
+            todo.completed = !todo.completed;
+            let _ = collection.replace_one(doc! { "_id": object_id }, todo, None).await;
+        }
+    }
+}
