@@ -1,7 +1,7 @@
 
 use axum::extract::Path;
 use axum::Json;
-use axum::{routing::get, Router, extract::State};
+use axum::{routing::{get,post}, Router, extract::State};
 use crate::models::models::Todo;
 use crate::state::AppState;
 use crate::controllers::controllers;
@@ -23,9 +23,14 @@ async fn get_task_by_id(State(state) : State<AppState>, Path(id) : Path<String>)
     }
 }
 
+async fn create_task(State(state) : State<AppState>, Json(todo) : Json<Todo>) {
+    controllers::create_task(state,todo).await;
+}
+
 pub fn create_route(app_state: AppState) -> Router<()> {
     Router::new()
     .route("/", get(get_all_tasks))
     .route("/todo/:id", get(get_task_by_id))
+    .route("/todo",post(create_task))
     .with_state(app_state)
 }

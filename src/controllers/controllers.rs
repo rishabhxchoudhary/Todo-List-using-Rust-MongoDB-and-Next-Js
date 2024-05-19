@@ -14,11 +14,6 @@ pub async fn get_all_tasks(state : AppState) -> Vec<Todo> {
     tasks
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-struct Foo {
-    oid: ObjectId,
-}
-
 pub async fn get_task_by_id(state : AppState, id: String) -> Option<Todo> {
     let client : &mongodb::Client = &state.db_client;
     let collection: Collection<Todo> = client.database("todoList").collection("tasks");
@@ -28,4 +23,10 @@ pub async fn get_task_by_id(state : AppState, id: String) -> Option<Todo> {
     } else {
         None
     }
+}
+
+pub async fn create_task(state : AppState, todo: Todo) {
+    let client : &mongodb::Client = &state.db_client;
+    let collection: Collection<Todo> = client.database("todoList").collection("tasks");
+    let _ = collection.insert_one(todo, None).await;
 }
